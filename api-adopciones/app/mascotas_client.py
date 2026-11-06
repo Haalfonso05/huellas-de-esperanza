@@ -3,6 +3,7 @@
 Este módulo es el único punto de integración entre los dos servicios: la API
 de Adopciones nunca consulta la tabla `mascotas` directamente.
 """
+import logging
 import os
 from uuid import UUID
 
@@ -10,6 +11,8 @@ import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
+
+logger = logging.getLogger("uvicorn.error")
 
 MASCOTAS_API_URL = os.environ["MASCOTAS_API_URL"].rstrip("/")
 TIMEOUT = float(os.getenv("MASCOTAS_TIMEOUT", "10"))
@@ -30,11 +33,13 @@ def _peticion(metodo: str, ruta: str, **kwargs) -> dict:
         with httpx.Client(timeout=TIMEOUT, transport=transporte) as cliente:
             respuesta = cliente.request(metodo, f"{MASCOTAS_API_URL}{ruta}", **kwargs)
     except httpx.HTTPError as error:
+        logger.warning("Fallo la llamada %s %s: %r", metodo, ruta, error)
         raise ServicioMascotasNoDisponible() from error
 
     if respuesta.status_code == 404:
         raise MascotaNoEncontrada()
     if respuesta.is_error:
+        logger.warning("%s %s respondio %s", metodo, ruta, respuesta.status_code)
         raise ServicioMascotasNoDisponible()
     return respuesta.json()
 

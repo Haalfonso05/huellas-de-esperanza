@@ -184,7 +184,7 @@ $("#form-registro").addEventListener("submit", (evento) => {
       body: JSON.stringify(datos),
     });
     $("#dialogo-registro").close();
-    avisar(`${mascota.nombre} quedó registrada.`);
+    avisar(`Mascota registrada: ${mascota.nombre}.`);
     cargarMascotas();
   });
 });
@@ -256,7 +256,7 @@ $("#lista-solicitudes").addEventListener("click", (evento) => {
   const aprobar = decidir === "aprobar";
   $("#decision-titulo").textContent = aprobar ? `Aprobar la adopción de ${mascota}` : `Rechazar la solicitud de ${persona}`;
   $("#decision-detalle").textContent = aprobar
-    ? `${mascota} quedará adoptada por ${persona} y se rechazarán sus demás solicitudes pendientes.`
+    ? `La adopción de ${mascota} quedará a nombre de ${persona} y se rechazarán las demás solicitudes pendientes.`
     : `La solicitud para adoptar a ${mascota} quedará rechazada.`;
   const confirmar = $("#decision-confirmar");
   confirmar.textContent = aprobar ? "Aprobar" : "Rechazar";

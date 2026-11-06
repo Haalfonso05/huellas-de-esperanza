@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Huellas de Esperanza</title>
+  <meta name="description" content="Conoce a las mascotas de la Fundación Huellas de Esperanza y solicita su adopción.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="cabecera">
+    <h1 class="marca">Huellas de Esperanza</h1>
+    <nav class="pestanas" aria-label="Secciones">
+      <button type="button" class="pestana" data-vista="mascotas" aria-current="page">Mascotas</button>
+      <button type="button" class="pestana" data-vista="solicitudes">Solicitudes</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="vista-mascotas">
+      <div class="barra">
+        <p class="intro">Estos animales buscan un hogar. Elige uno y envía tu solicitud de adopción.</p>
+        <div class="controles">
+          <label>Especie
+            <select id="filtro-especie">
+              <option value="">Todas</option>
+              <option value="perro">Perros</option>
+              <option value="gato">Gatos</option>
+              <option value="otro">Otros</option>
+            </select>
+          </label>
+          <label>Estado
+            <select id="filtro-estado">
+              <option value="">Todos</option>
+              <option value="disponible" selected>Disponibles</option>
+              <option value="adoptada">Adoptadas</option>
+            </select>
+          </label>
+          <button type="button" class="boton boton-claro" id="abrir-registro">Registrar mascota</button>
+        </div>
+      </div>
+      <div id="estado-mascotas" class="aviso" role="status"></div>
+      <div id="muro" class="muro"></div>
+    </section>
+
+    <section id="vista-solicitudes" hidden>
+      <div class="barra">
+        <p class="intro">Revisa cada solicitud. Al aprobar una, la mascota queda adoptada y las demás solicitudes pendientes se rechazan.</p>
+        <div class="controles">
+          <label>Estado
+            <select id="filtro-solicitud">
+              <option value="">Todas</option>
+              <option value="pendiente" selected>Pendientes</option>
+              <option value="aprobada">Aprobadas</option>
+              <option value="rechazada">Rechazadas</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div id="estado-solicitudes" class="aviso" role="status"></div>
+      <div id="lista-solicitudes" class="lista"></div>
+    </section>
+  </main>
+
+  <dialog id="dialogo-solicitud" class="dialogo">
+    <form id="form-solicitud">
+      <h2>Solicitar la adopción de <span id="solicitud-nombre"></span></h2>
+      <input type="hidden" name="mascota_id">
+      <label>Nombre completo <input name="solicitante_nombre" required minlength="2" maxlength="120" autocomplete="name"></label>
+      <label>Correo <input name="solicitante_email" type="email" required autocomplete="email"></label>
+      <label>Teléfono <input name="solicitante_telefono" type="tel" required minlength="7" maxlength="20" autocomplete="tel"></label>
+      <label>Dirección <input name="direccion" required minlength="5" maxlength="200" autocomplete="street-address"></label>
+      <label>¿Por qué quieres adoptarla? <textarea name="motivo" rows="3" required minlength="10" maxlength="1000"></textarea></label>
+      <p class="error" role="alert"></p>
+      <div class="acciones">
+        <button type="button" class="boton boton-claro" data-cerrar>Cancelar</button>
+        <button type="submit" class="boton">Enviar solicitud</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-registro" class="dialogo">
+    <form id="form-registro">
+      <h2>Registrar mascota</h2>
+      <label>Nombre <input name="nombre" required maxlength="80"></label>
+      <div class="dos">
+        <label>Especie
+          <select name="especie" required>
+            <option value="perro">Perro</option>
+            <option value="gato">Gato</option>
+            <option value="otro">Otro</option>
+          </select>
+        </label>
+        <label>Raza <input name="raza" maxlength="80"></label>
+        <label>Edad en meses <input name="edad_meses" type="number" min="0" max="600"></label>
+        <label>Sexo
+          <select name="sexo">
+            <option value="">Sin dato</option>
+            <option value="macho">Macho</option>
+            <option value="hembra">Hembra</option>
+          </select>
+        </label>
+        <label>Tamaño
+          <select name="tamano">
+            <option value="">Sin dato</option>
+            <option value="pequeno">Pequeño</option>
+            <option value="mediano">Mediano</option>
+            <option value="grande">Grande</option>
+          </select>
+        </label>
+        <label>URL de la foto <input name="foto_url" type="url" maxlength="500"></label>
+      </div>
+      <label>Descripción <textarea name="descripcion" rows="3" maxlength="1000"></textarea></label>
+      <p class="error" role="alert"></p>
+      <div class="acciones">
+        <button type="button" class="boton boton-claro" data-cerrar>Cancelar</button>
+        <button type="submit" class="boton">Registrar mascota</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-decision" class="dialogo">
+    <form id="form-decision">
+      <h2 id="decision-titulo"></h2>
+      <p id="decision-detalle"></p>
+      <label>Observación (opcional) <textarea name="observacion" rows="2" maxlength="500"></textarea></label>
+      <p class="error" role="alert"></p>
+      <div class="acciones">
+        <button type="button" class="boton boton-claro" data-cerrar>Cancelar</button>
+        <button type="submit" class="boton" id="decision-confirmar"></button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

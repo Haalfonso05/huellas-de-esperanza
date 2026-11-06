@@ -1,0 +1,263 @@
+:root {
+  --papel: #fffdf6;
+  --tinta: #1a1a2e;
+  --tinta-suave: #55566a;
+  --amarillo: #f8cf3f;
+  --cobalto: #2438c9;
+  --rosa: #f9adc8;
+  --verde: #14724a;
+  --rojo: #b3261e;
+  --linea: #d9d6c8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 400 1.0625rem/1.5 "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+
+h1, h2, h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; margin: 0; }
+
+:focus-visible { outline: 3px solid var(--cobalto); outline-offset: 2px; }
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding: 2rem clamp(1rem, 4vw, 3rem) 1rem;
+}
+
+.marca {
+  font-weight: 800;
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  line-height: .95;
+  letter-spacing: -.03em;
+  max-width: 11ch;
+}
+
+.pestanas { display: flex; gap: .25rem; }
+
+.pestana {
+  font: 700 1.0625rem "Atkinson Hyperlegible", system-ui, sans-serif;
+  color: var(--tinta);
+  background: none;
+  border: 0;
+  border-bottom: 4px solid transparent;
+  padding: .5rem .75rem;
+  cursor: pointer;
+}
+.pestana[aria-current="page"] { border-color: var(--cobalto); color: var(--cobalto); }
+
+main { padding: 0 clamp(1rem, 4vw, 3rem) 4rem; }
+
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: 1.5rem;
+}
+.intro { margin: 0; max-width: 52ch; color: var(--tinta-suave); }
+.controles { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; }
+
+label { display: grid; gap: .25rem; font-size: .9375rem; font-weight: 700; }
+
+input, select, textarea {
+  font: 400 1rem "Atkinson Hyperlegible", system-ui, sans-serif;
+  color: var(--tinta);
+  background: #fff;
+  border: 2px solid var(--tinta);
+  border-radius: 4px;
+  padding: .5rem .625rem;
+  width: 100%;
+}
+textarea { resize: vertical; }
+
+.boton {
+  font: 700 1rem "Atkinson Hyperlegible", system-ui, sans-serif;
+  color: #fff;
+  background: var(--cobalto);
+  border: 2px solid var(--cobalto);
+  border-radius: 4px;
+  padding: .55rem 1rem;
+  cursor: pointer;
+}
+.boton:hover { background: var(--tinta); border-color: var(--tinta); }
+.boton:disabled { opacity: .55; cursor: wait; }
+.boton-claro { color: var(--tinta); background: transparent; border-color: var(--tinta); }
+.boton-claro:hover { color: #fff; }
+.boton-peligro { background: transparent; border-color: var(--rojo); color: var(--rojo); }
+.boton-peligro:hover { background: var(--rojo); border-color: var(--rojo); color: #fff; }
+
+.aviso:empty { display: none; }
+.aviso { padding: 1rem 0; color: var(--tinta-suave); }
+.aviso.es-error { color: var(--rojo); font-weight: 700; }
+
+/* Muro de carteles: cada mascota es un aviso comunitario con tiras para arrancar. */
+.muro {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.cartel {
+  --fondo: var(--amarillo);
+  --texto: var(--tinta);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--fondo);
+  color: var(--texto);
+}
+.cartel:nth-child(3n + 1) { transform: rotate(-.6deg); }
+.cartel:nth-child(3n + 2) { transform: rotate(.5deg); }
+.cartel[data-tono="1"] { --fondo: var(--cobalto); --texto: #fff; }
+.cartel[data-tono="2"] { --fondo: var(--rosa); }
+.cartel[data-tono="3"] { --fondo: var(--verde); --texto: #fff; }
+
+.cartel-foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+
+.cartel-cuerpo { padding: 1.25rem 1.25rem 1rem; flex: 1; }
+
+.cartel-nombre {
+  font-weight: 800;
+  font-size: clamp(3rem, 6vw, 4.25rem);
+  line-height: .95;
+  letter-spacing: -.03em;
+  overflow-wrap: anywhere;
+}
+.cartel-datos { margin: .75rem 0 .5rem; font-weight: 700; }
+.cartel-descripcion { margin: 0; }
+
+/* Las tiras: la acción de adoptar se ve como arrancar un papelito del cartel. */
+.tiras {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-top: 2px dashed currentColor;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: 700 1rem "Atkinson Hyperlegible", system-ui, sans-serif;
+  text-align: center;
+  position: relative;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s ease-out;
+}
+.tiras::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 7 - 2px), currentColor calc(100% / 7 - 2px) calc(100% / 7));
+  opacity: .35;
+  pointer-events: none;
+}
+.tiras span {
+  position: relative;
+  z-index: 1;
+  background: var(--fondo);
+  padding: .1rem .6rem;
+}
+.tiras:hover { transform: translateY(5px); }
+.tiras:hover span { text-decoration: underline; }
+
+.sello {
+  position: absolute;
+  top: 1.25rem;
+  right: .75rem;
+  transform: rotate(9deg);
+  font: 800 1.125rem "Bricolage Grotesque", system-ui, sans-serif;
+  color: var(--tinta);
+  background: var(--papel);
+  border: 3px solid var(--tinta);
+  border-radius: 4px;
+  padding: .15rem .6rem;
+}
+.cartel-adoptada .cartel-cuerpo { padding-bottom: 1.5rem; }
+
+/* Solicitudes */
+.lista { display: grid; gap: 0; border-top: 2px solid var(--tinta); }
+
+.solicitud {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(0, 2.2fr) auto;
+  gap: .5rem 2rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--linea);
+  align-items: start;
+}
+.solicitud h3 { font-size: 1.75rem; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.solicitud p { margin: 0; overflow-wrap: anywhere; }
+.solicitud .contacto { color: var(--tinta-suave); font-size: .9375rem; }
+.solicitud .motivo { margin-top: .5rem; max-width: 62ch; }
+.solicitud .observacion { margin-top: .5rem; font-size: .9375rem; color: var(--tinta-suave); }
+
+.etiqueta {
+  display: inline-block;
+  margin-top: .5rem;
+  padding: .05rem .5rem;
+  border-radius: 4px;
+  font-size: .875rem;
+  font-weight: 700;
+}
+.etiqueta-pendiente { background: var(--amarillo); }
+.etiqueta-aprobada { background: var(--verde); color: #fff; }
+.etiqueta-rechazada { background: var(--linea); }
+
+.solicitud-acciones { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* Diálogos */
+.dialogo {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 1.5rem;
+  border: 3px solid var(--tinta);
+  border-radius: 6px;
+  background: var(--papel);
+  color: var(--tinta);
+}
+.dialogo::backdrop { background: rgba(26, 26, 46, .6); }
+.dialogo form { display: grid; gap: .875rem; }
+.dialogo h2 { font-size: 1.75rem; font-weight: 800; line-height: 1.1; letter-spacing: -.02em; }
+.dialogo p { margin: 0; }
+.dos { display: grid; grid-template-columns: 1fr 1fr; gap: .875rem; }
+.error { color: var(--rojo); font-weight: 700; }
+.error:empty { display: none; }
+.acciones { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 2rem);
+  background: var(--tinta);
+  color: #fff;
+  padding: .75rem 1.25rem;
+  border-radius: 4px;
+  font-weight: 700;
+  visibility: hidden;
+}
+.toast.visible { visibility: visible; }
+
+@media (max-width: 40rem) {
+  .solicitud { grid-template-columns: 1fr; }
+  .dos { grid-template-columns: 1fr; }
+  .controles { width: 100%; }
+  .controles label { flex: 1 1 8rem; }
+  .cartel:nth-child(n) { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}

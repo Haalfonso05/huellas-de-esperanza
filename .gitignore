@@ -1,0 +1,20 @@
+# Credenciales: nunca se suben a GitHub
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Frontend
+node_modules/
+dist/
+
+# Sistema y editores
+.DS_Store
+.vscode/
+.idea/

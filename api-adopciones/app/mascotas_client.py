@@ -1,8 +1,4 @@
-"""Cliente HTTP de la API de Mascotas.
-
-Este módulo es el único punto de integración entre los dos servicios: la API
-de Adopciones nunca consulta la tabla `mascotas` directamente.
-"""
+"""Cliente HTTP para consumir la API de Mascotas."""
 import logging
 import os
 from uuid import UUID
@@ -27,8 +23,12 @@ class ServicioMascotasNoDisponible(Exception):
 
 
 def _peticion(metodo: str, ruta: str, **kwargs) -> dict:
+    """Envía una petición a la API de Mascotas y devuelve el JSON de la respuesta.
+
+    Lanza MascotaNoEncontrada si responde 404 y ServicioMascotasNoDisponible
+    si no responde o devuelve otro error.
+    """
     try:
-        # retries=2 reintenta solo si falla el establecimiento de la conexión.
         transporte = httpx.HTTPTransport(retries=2)
         with httpx.Client(timeout=TIMEOUT, transport=transporte) as cliente:
             respuesta = cliente.request(metodo, f"{MASCOTAS_API_URL}{ruta}", **kwargs)
@@ -45,9 +45,11 @@ def _peticion(metodo: str, ruta: str, **kwargs) -> dict:
 
 
 def esta_disponible(mascota_id: UUID) -> bool:
+    """Consulta si la mascota está disponible para adopción."""
     datos = _peticion("GET", f"/mascotas/{mascota_id}/disponibilidad")
     return datos["disponible"]
 
 
 def actualizar_estado(mascota_id: UUID, estado: str) -> None:
+    """Cambia el estado de la mascota (disponible o adoptada)."""
     _peticion("PATCH", f"/mascotas/{mascota_id}/estado", json={"estado": estado})

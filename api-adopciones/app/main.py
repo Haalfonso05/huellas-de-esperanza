@@ -1,8 +1,4 @@
-"""API de Adopciones: registra, consulta y gestiona las solicitudes de adopción.
-
-Es la única dueña de la tabla `solicitudes` y se comunica con la API de
-Mascotas por HTTP para verificar la disponibilidad y actualizar los estados.
-"""
+"""API de Adopciones: gestión de solicitudes de adopción."""
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -59,6 +55,7 @@ app.add_middleware(
 
 
 def servicio_caido() -> HTTPException:
+    """Error 503 para cuando la API de Mascotas no responde."""
     return HTTPException(
         status.HTTP_503_SERVICE_UNAVAILABLE,
         "La API de Mascotas no está disponible. No se realizó ningún cambio; inténtalo de nuevo.",
@@ -148,7 +145,7 @@ def crear_solicitud(datos: SolicitudCrear):
 
 
 def _bloquear_pendiente(conn, solicitud_id: UUID) -> dict:
-    """Bloquea la solicitud para evitar dos decisiones simultáneas sobre ella."""
+    """Bloquea la solicitud (FOR UPDATE) y valida que siga pendiente."""
     solicitud = conn.execute(
         f"SELECT {COLUMNAS} FROM solicitudes WHERE id = %s FOR UPDATE", (solicitud_id,)
     ).fetchone()
@@ -174,6 +171,11 @@ def _bloquear_pendiente(conn, solicitud_id: UUID) -> dict:
     ),
 )
 def aprobar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
+    """Aprueba la solicitud, rechaza las demás pendientes y marca la mascota como adoptada.
+
+    Si falla la llamada a la API de Mascotas, revierte la transacción y
+    devuelve la mascota a disponible.
+    """
     observacion = decision.observacion if decision else None
     mascota_id = None
     estado_enviado = False
@@ -187,9 +189,7 @@ def aprobar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
                 raise HTTPException(status.HTTP_404_NOT_FOUND, "Solicitud no encontrada")
             mascota_id = fila["mascota_id"]
 
-            # Las aprobaciones de una misma mascota se atienden en fila hasta el
-            # commit. Sin esto, dos aprobaciones simultáneas pueden bloquearse
-            # entre sí (deadlock) al rechazar cada una la solicitud de la otra.
+            # Serializa las aprobaciones de la misma mascota
             conn.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended(%s::text, 0))",
                 (mascota_id,),
@@ -199,8 +199,6 @@ def aprobar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
             if not mascotas_client.esta_disponible(mascota_id):
                 raise HTTPException(status.HTTP_409_CONFLICT, "La mascota ya no está disponible")
 
-            # El índice único `una_aprobada_por_mascota` es la garantía final de
-            # la regla, incluso si otro proceso modifica la tabla directamente.
             try:
                 aprobada = conn.execute(
                     f"""
@@ -226,7 +224,6 @@ def aprobar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
                 (mascota_id,),
             )
 
-            # Último paso: si falla, la transacción se revierte completa.
             estado_enviado = True
             mascotas_client.actualizar_estado(mascota_id, "adoptada")
         return aprobada
@@ -236,9 +233,7 @@ def aprobar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
     except MascotaNoEncontrada:
         raise HTTPException(status.HTTP_409_CONFLICT, "La mascota ya no existe")
     except Exception as error:
-        # Compensación: la petición pudo aplicarse aunque la respuesta se perdiera,
-        # o pudo fallar el commit. La aprobación no se guardó, así que se devuelve
-        # la mascota a disponible para no dejar los dos servicios desalineados.
+        # Compensación: devolver la mascota a disponible
         if estado_enviado:
             try:
                 mascotas_client.actualizar_estado(mascota_id, "disponible")
@@ -259,6 +254,7 @@ def aprobar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
     summary="Rechazar una solicitud",
 )
 def rechazar_solicitud(solicitud_id: UUID, decision: Optional[Decision] = None):
+    """Rechaza una solicitud pendiente."""
     observacion = decision.observacion if decision else None
     with pool.connection() as conn:
         _bloquear_pendiente(conn, solicitud_id)
